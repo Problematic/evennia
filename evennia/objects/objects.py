@@ -517,7 +517,7 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
 
     # search methods and hooks
 
-    def get_search_query_replacement(self, searchdata, **kwargs):
+    def get_search_query_replacement(self, searchdata: str, **kwargs) -> str:
         """
         This method is called by the search method to allow for direct
         replacements of the search string before it is used in the search.
@@ -536,7 +536,7 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
             )
         return searchdata
 
-    def get_search_direct_match(self, searchdata, **kwargs):
+    def get_search_direct_match(self, searchdata: str, **kwargs):
         """
         This method is called by the search method to allow for direct
         replacements, such as 'me' always being an alias for this object.
@@ -615,8 +615,8 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
 
     def get_search_result(
         self,
-        searchdata,
-        attribute_name=None,
+        searchdata: str,
+        attribute_name: str = None,
         typeclass=None,
         candidates=None,
         exact=False,
@@ -926,7 +926,7 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
             return results
         return _AT_SEARCH_RESULT(results, self, query=searchdata)
 
-    def execute_cmd(self, raw_string, session=None, **kwargs):
+    def execute_cmd(self, raw_string: str, session=None, **kwargs):
         """
         Do something as this object. This is never called normally,
         it's only used when wanting specifically to let an object be
@@ -1733,7 +1733,7 @@ class DefaultObject(ObjectDB, metaclass=TypeclassBase):
 
         return singular, plural
 
-    def get_display_header(self, looker, **kwargs):
+    def get_display_header(self, looker, **kwargs) -> str:
         """
         Get the 'header' component of the object description. Called by `return_appearance`.
 

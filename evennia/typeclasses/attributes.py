@@ -13,6 +13,7 @@ import fnmatch
 import re
 from collections import defaultdict
 from copy import copy
+from typing import Generic, TypeVar, overload
 
 from django.conf import settings
 from django.db import models
@@ -161,8 +162,10 @@ class InMemoryAttribute(IAttribute):
 
     value = property(__value_get, __value_set, __value_del)
 
+TInstance = TypeVar('TInstance')
+TValue = TypeVar('TValue')
 
-class AttributeProperty:
+class AttributeProperty(Generic[TInstance, TValue]):
     """
     AttributeProperty.
 
@@ -171,7 +174,7 @@ class AttributeProperty:
     attrhandler_name = "attributes"
     cached_default_name_template = "_property_attribute_default_{key}"
 
-    def __init__(self, default=None, category=None, strattr=False, lockstring="", autocreate=True):
+    def __init__(self, default: TValue=None, category: str=None, strattr=False, lockstring="", autocreate=True):
         """
         Allows for specifying Attributes as Django-like 'fields' on the class level. Note that while
         one can set a lock on the Attribute, there is no way to *check* said lock when accessing via
@@ -219,7 +222,7 @@ class AttributeProperty:
         """
         self._key = name
 
-    def _get_and_cache_default(self, instance):
+    def _get_and_cache_default(self, instance: TInstance) -> TValue:
         """
         Get and cache the default value for this attribute. We make sure to convert any mutables
         into _Saver* equivalent classes here and cache the result on the instance's AttributeHandler.
@@ -236,7 +239,13 @@ class AttributeProperty:
             setattr(attrhandler, self.cached_default_name_template.format(key=self._key), value)
         return value
 
-    def __get__(self, instance, owner):
+    @overload
+    def __get__(self, instance: TInstance, owner: type[TInstance]) -> TValue: ...
+
+    @overload
+    def __get__(self, instance: None, owner: type[TInstance]) -> "AttributeProperty": ...
+
+    def __get__(self, instance: TInstance | None, owner: type[TInstance]) -> TValue | "AttributeProperty":
         """
         Called when the attrkey is retrieved from the instance.
 
@@ -262,7 +271,7 @@ class AttributeProperty:
                 raise
         return value
 
-    def __set__(self, instance, value):
+    def __set__(self, instance: TInstance, value: TValue):
         """
         Called when assigning to the property (and when auto-creating an Attribute).
 

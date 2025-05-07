@@ -604,7 +604,7 @@ class TraitHandler:
         """Returns error message if trait objects are assigned directly."""
         return self.__setattr__(trait_key, value)
 
-    def __getattr__(self, trait_key):
+    def __getattr__(self, trait_key) -> 'Trait':
         """Returns Trait instances accessed as attributes."""
         return self.get(trait_key)
 
@@ -643,7 +643,7 @@ class TraitHandler:
         """
         return list(self.trait_data.keys())
 
-    def get(self, trait_key):
+    def get(self, trait_key) -> 'Trait':
         """
         Args:
             trait_key (str): key from the traits dict containing config data.

@@ -11,6 +11,7 @@ respective handlers.
 """
 
 from collections import defaultdict
+from typing import overload
 
 from django.conf import settings
 from django.db import models
@@ -555,6 +556,50 @@ class TagHandler(object):
             return ret
 
         return ret[0] if len(ret) == 1 else ret
+
+    @overload
+    def get(
+        self,
+        key=None,
+        default=None,
+        category=None,
+        return_tagobj: False = False,
+        return_list: True = False,
+        raise_exception=False,
+    ) -> list[str]: ...
+
+    @overload
+    def get(
+        self,
+        key=None,
+        default=None,
+        category=None,
+        return_tagobj: False = False,
+        return_list=False,
+        raise_exception=False,
+    ) -> str | list[str] | None: ...
+
+    @overload
+    def get(
+        self,
+        key=None,
+        default=None,
+        category=None,
+        return_tagobj: True = False,
+        return_list: True = False,
+        raise_exception=False,
+    ) -> list[Tag]: ...
+
+    @overload
+    def get(
+        self,
+        key=None,
+        default=None,
+        category=None,
+        return_tagobj: True = False,
+        return_list=False,
+        raise_exception=False,
+    ) -> Tag | list[Tag] | None: ...
 
     def get(
         self,

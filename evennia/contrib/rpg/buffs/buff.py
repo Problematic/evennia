@@ -99,6 +99,8 @@ many attributes and hook methods you can overload to create complex, interrelate
 
 """
 
+from __future__ import annotations
+
 import time
 from random import random
 
@@ -116,7 +118,7 @@ class BaseBuff:
 
     triggers = []  # The effect's trigger strings, used for functions.
 
-    handler = None
+    handler: BuffHandler | None = None
     start = 0
 
     duration = -1  # Default buff duration; -1 for permanent, 0 for "instant", >0 normal
@@ -184,7 +186,7 @@ class BaseBuff:
             self.handler.buffcache[self.buffkey][attr] = value
         super().__setattr__(attr, value)
 
-    def conditional(self, *args, **kwargs):
+    def conditional(self, *args, **kwargs) -> bool:
         """Hook function for conditional evaluation.
 
         This must return True for a buff to apply modifiers, trigger effects, or tick."""
@@ -429,7 +431,7 @@ class BuffHandler:
     # region methods
     def add(
         self,
-        buff: BaseBuff,
+        buff: type[BaseBuff],
         key: str = None,
         stacks=0,
         duration=None,
@@ -1116,7 +1118,7 @@ class CmdBuff(Command):
     Buff a target.
 
     Usage:
-      buff <target> <buff>
+        buff <target> <buff>
 
     Applies the specified buff to the target. All buffs are defined in the bufflist dictionary on this command.
     """

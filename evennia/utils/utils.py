@@ -27,8 +27,8 @@ from inspect import getmembers, getmodule, getmro, ismodule, trace
 from os.path import join as osjoin
 from string import punctuation
 from unicodedata import east_asian_width
-from collections.abc import Callable
-from typing import Generic, TypeVar, overload
+from collections.abc import Callable, Iterable
+from typing import Any, Generic, TypeGuard, TypeVar, overload
 
 from django.apps import apps
 from django.conf import settings
@@ -62,7 +62,7 @@ _SA = object.__setattr__
 _DA = object.__delattr__
 
 
-def is_iter(obj):
+def is_iter(obj) -> TypeGuard[Iterable]:
     """
     Checks if an object behaves iterably.
 
@@ -87,7 +87,19 @@ def is_iter(obj):
         return False
 
 
-def make_iter(obj):
+@overload
+def make_iter(obj: str | bytes) -> list: ...
+
+
+@overload
+def make_iter(obj: Iterable) -> Iterable: ...
+
+
+@overload
+def make_iter(obj: list | Any) -> list: ...
+
+
+def make_iter(obj) -> list | Iterable:
     """
     Makes sure that the object is always iterable.
 
@@ -102,7 +114,7 @@ def make_iter(obj):
     return not is_iter(obj) and [obj] or obj
 
 
-def wrap(text, width=None, indent=0):
+def wrap(text, width=None, indent=0) -> str:
     """
     Safely wrap text to a certain number of characters.
 
@@ -126,7 +138,7 @@ def wrap(text, width=None, indent=0):
 fill = wrap
 
 
-def pad(text, width=None, align="c", fillchar=" "):
+def pad(text, width=None, align="c", fillchar=" ") -> str:
     """
     Pads to a given width.
 
@@ -152,7 +164,7 @@ def pad(text, width=None, align="c", fillchar=" "):
         return text.center(width, fillchar)
 
 
-def crop(text, width=None, suffix="[...]"):
+def crop(text, width=None, suffix="[...]") -> str:
     """
     Crop text to a certain width, throwing away text from too-long
     lines.
@@ -180,7 +192,7 @@ def crop(text, width=None, suffix="[...]"):
         return to_str(text)
 
 
-def dedent(text, baseline_index=None, indent=None):
+def dedent(text, baseline_index=None, indent=None) -> str:
     """
     Safely clean all whitespace at the left of a paragraph.
 
@@ -220,7 +232,7 @@ def dedent(text, baseline_index=None, indent=None):
         )
 
 
-def justify(text, width=None, align="l", indent=0, fillchar=" "):
+def justify(text, width=None, align="l", indent=0, fillchar=" ") -> str:
     """
     Fully justify a text so that it fits inside `width`. When using
     full justification (default) this will be done by padding between
@@ -348,7 +360,7 @@ def justify(text, width=None, align="l", indent=0, fillchar=" "):
     return lb.join([indentstring + line for line in lines])
 
 
-def columnize(string, columns=2, spacing=4, align="l", width=None):
+def columnize(string, columns=2, spacing=4, align="l", width=None) -> str:
     """
     Break a string into a number of columns, using as little
     vertical space as possible.
@@ -404,7 +416,7 @@ def columnize(string, columns=2, spacing=4, align="l", width=None):
     return "\n".join(rows)
 
 
-def iter_to_str(iterable, sep=",", endsep=", and", addquote=False):
+def iter_to_str(iterable: Iterable, sep=",", endsep=", and", addquote=False) -> str:
     """
     This pretty-formats an iterable list as string output, adding an optional
     alternative separator to the second to last entry.  If `addquote`
@@ -478,7 +490,7 @@ iter_to_string = iter_to_str
 re_empty = re.compile("\n\\s*\n")
 
 
-def compress_whitespace(text, max_linebreaks=1, max_spacing=2):
+def compress_whitespace(text: str, max_linebreaks=1, max_spacing=2) -> str:
     """
     Removes extra sequential whitespace in a block of text. This will also remove any trailing
     whitespace at the end.
@@ -502,7 +514,7 @@ def compress_whitespace(text, max_linebreaks=1, max_spacing=2):
     return text
 
 
-def wildcard_to_regexp(instring):
+def wildcard_to_regexp(instring: str) -> str:
     """
     Converts a player-supplied string that may have wildcards in it to
     regular expressions. This is useful for name matching.
@@ -534,7 +546,7 @@ def wildcard_to_regexp(instring):
     return regexp_string
 
 
-def time_format(seconds, style=0):
+def time_format(seconds: int, style=0) -> str:
     """
     Function to return a 'prettified' version of a value in seconds.
 
@@ -670,7 +682,7 @@ def time_format(seconds, style=0):
     return retval.strip()
 
 
-def datetime_format(dtobj):
+def datetime_format(dtobj) -> str:
     """
     Pretty-prints the time since a given time.
 
@@ -701,7 +713,7 @@ def datetime_format(dtobj):
     return timestring
 
 
-def host_os_is(osname):
+def host_os_is(osname) -> bool:
     """
     Check to see if the host OS matches the query.
 
@@ -716,7 +728,7 @@ def host_os_is(osname):
     return os.name == osname
 
 
-def get_evennia_version(mode="long"):
+def get_evennia_version(mode="long") -> str:
     """
     Helper method for getting the current evennia version.
 
@@ -742,7 +754,7 @@ def get_evennia_version(mode="long"):
         return vers
 
 
-def pypath_to_realpath(python_path, file_ending=".py", pypath_prefixes=None):
+def pypath_to_realpath(python_path, file_ending=".py", pypath_prefixes=None) -> list:
     """
     Converts a dotted Python path to an absolute path under the
     Evennia library directory or under the current game directory.
@@ -802,7 +814,7 @@ def pypath_to_realpath(python_path, file_ending=".py", pypath_prefixes=None):
     return list(set(p for p in paths if os.path.isfile(p)))
 
 
-def dbref(inp, reqhash=True):
+def dbref(inp, reqhash=True) -> int | None:
     """
     Converts/checks if input is a valid dbref.
 
@@ -886,7 +898,7 @@ _UNICODE_MAP = {
 }
 
 
-def latinify(string, default="?", pure_ascii=False):
+def latinify(string, default="?", pure_ascii=False) -> str:
     """
     Convert a unicode string to "safe" ascii/latin-1 characters.
     This is used as a last resort when normal encoding does not work.
@@ -940,7 +952,7 @@ def latinify(string, default="?", pure_ascii=False):
     return "".join(converted)
 
 
-def to_bytes(text, session=None):
+def to_bytes(text, session=None) -> bytes:
     """
     Try to encode the given text to bytes, using encodings from settings or from Session. Will
     always return a bytes, even if given something that is not str or bytes.
@@ -983,7 +995,7 @@ def to_bytes(text, session=None):
         return text.encode(default_encoding, errors="replace")
 
 
-def to_str(text, session=None):
+def to_str(text, session=None) -> str:
     """
     Try to decode a bytestream to a python str, using encoding schemas from settings
     or from Session. Will always return a str(), also if not given a str/bytes.
@@ -1022,7 +1034,7 @@ def to_str(text, session=None):
         return text.decode(default_encoding, errors="replace")
 
 
-def validate_email_address(emailaddress):
+def validate_email_address(emailaddress) -> bool:
     """
     Checks if an email address is syntactically correct. Makes use
     of the django email-validator for consistency.
@@ -1045,7 +1057,7 @@ def validate_email_address(emailaddress):
         return True
 
 
-def inherits_from(obj, parent):
+def inherits_from(obj, parent) -> bool:
     """
     Takes an object and tries to determine if it inherits at *any*
     distance from parent.
@@ -1082,7 +1094,7 @@ def inherits_from(obj, parent):
     return any(1 for obj_path in obj_paths if obj_path == parent_path)
 
 
-def server_services():
+def server_services() -> dict:
     """
     Lists all services active on the Server. Observe that since
     services are launched in memory, this function will only return
@@ -1104,7 +1116,7 @@ def server_services():
     return server
 
 
-def uses_database(name="sqlite3"):
+def uses_database(name="sqlite3") -> bool:
     """
     Checks if the game is currently using a given database. This is a
     shortcut to having to use the full backend name.
